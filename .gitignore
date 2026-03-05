@@ -1,0 +1,33 @@
+
+# Build output
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+
+# VS Code settings
+.vscode/
+
+# Visual Studio settings
+.vs/
+
+*.db
+
+TestResults/
+*.DS_Store
+
+
+# Other temp/cache files
+*.log
+*.tmp
+*.bak
+*.dbmdl
+*.cache
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

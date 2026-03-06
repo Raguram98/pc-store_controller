@@ -11,6 +11,7 @@ A RESTful Web API built with ASP.NET Core and Clean Architecture. This applicati
 **Database**: SQL Server  
 **Mapping**: AutoMapper  
 **Validation**: FluentValidation  
+**Authentication**: JWT Bearer Authentication  
 **Testing**: Postman  
 **Architecture**: Clean Architecture (API, Application, Domain, Infrastructure)
 
@@ -20,7 +21,11 @@ A RESTful Web API built with ASP.NET Core and Clean Architecture. This applicati
 
 - RESTful API with **full CRUD** operations for:
   - Users
-  - PC Build Configurations
+  - PC Build Configurations  
+- JWT-based Authentication & Authorization
+  - Secure login endpoint
+  - Protected endpoints using [Authorize]
+  - Token-based access control
 - Clean separation of concerns using layered architecture:
   - `Domain` → Entities
   - `Application` → DTOs, interfaces, business rules

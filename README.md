@@ -1,12 +1,12 @@
 # PC Store API
 
-A production-ready RESTful Web API built with ASP.NET Core Minimal APIs and Clean Architecture. This application manages users and their PC build configurations with full CRUD functionality using Entity Framework Core and SQL Server.
+A RESTful Web API built with ASP.NET Core and Clean Architecture. This application manages users and their PC build configurations with full CRUD functionality using Entity Framework Core and SQL Server.
 
 ---
 
 ## 🔧 Tech Stack
 
-**Framework**: ASP.NET Core Minimal APIs  
+**Framework**: ASP.NET Core Web API  
 **ORM**: Entity Framework Core (Code-First)  
 **Database**: SQL Server  
 **Mapping**: AutoMapper  
@@ -25,7 +25,7 @@ A production-ready RESTful Web API built with ASP.NET Core Minimal APIs and Clea
   - `Domain` → Entities
   - `Application` → DTOs, interfaces, business rules
   - `Infrastructure` → Data access (DbContext, repositories)
-  - `API` → Minimal API endpoint definitions
+  - `API` → Controllers and endpoint definitions
 - Implements **Repository and Service Patterns** to isolate logic and improve testability
 - **AutoMapper** for mapping between domain models and DTOs
 - **FluentValidation** for structured and reusable input validation

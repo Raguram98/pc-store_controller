@@ -13,6 +13,8 @@ namespace PCStoreApi.Infrastructure.Data
         public DbSet<UserInfo> UserInfo { get; set; }
         public DbSet<PCBuild> PCBuilds { get; set; }
 
+        public DbSet<User> Users { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<UserInfo>().ToTable(nameof(UserInfo));

@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Identity.Client;
@@ -8,6 +9,7 @@ using System.Collections;
 
 namespace PCStoreApi.API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PCBuildController : ControllerBase
@@ -29,6 +31,7 @@ namespace PCStoreApi.API.Controllers
             _updateValidator = updateValidator;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -36,6 +39,7 @@ namespace PCStoreApi.API.Controllers
             return Ok(builds);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -43,6 +47,7 @@ namespace PCStoreApi.API.Controllers
             return build is null ? NotFound() : Ok(build);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId}")]
         public async Task<IActionResult> GetByUserId(int userId)
         {
@@ -77,6 +82,7 @@ namespace PCStoreApi.API.Controllers
               created);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, PCBuildUpdateDto dto)
         {
@@ -96,6 +102,7 @@ namespace PCStoreApi.API.Controllers
             return success ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

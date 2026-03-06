@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -22,6 +23,7 @@ namespace PCStoreApi.API.Controllers
             _updateValidator = updateValidator;
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -29,6 +31,7 @@ namespace PCStoreApi.API.Controllers
             return Ok(users);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -36,6 +39,7 @@ namespace PCStoreApi.API.Controllers
             return user is null ? NotFound() : Ok(user);
         }
 
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> Create(UserCreateDto dto) 
         {
@@ -47,7 +51,7 @@ namespace PCStoreApi.API.Controllers
                     .GroupBy(e => e.PropertyName)
                     .ToDictionary(
                     g => g.Key,
-                    g => g.Select(e => e.ErrorMessage.ToArray()));
+                    g => g.Select(e => e.ErrorMessage).ToArray());
                
                 return BadRequest(new { errors });
             }
@@ -59,6 +63,7 @@ namespace PCStoreApi.API.Controllers
                 created);
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, UserUpdateDto dto)
         {
@@ -80,6 +85,7 @@ namespace PCStoreApi.API.Controllers
             return success ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

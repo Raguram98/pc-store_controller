@@ -6,8 +6,8 @@ namespace PCStoreApi.Application.Interfaces
     public interface IPCBuildRepository
     {
         Task<List<PCBuild>> GetAllBuildsAsync();
-        Task<PCBuild?> GetBuildByIdAsync(int id);
-        Task<PCBuild?> GetBuildByUserIdAsync(int userId);
+        Task<PCBuild?> GetBuildByIdAsync(Guid id);
+        Task<PCBuild?> GetBuildByUserIdAsync(Guid userId);
         Task AddBuildAsync(PCBuild build);
         Task UpdateBuildAsync(PCBuild build);
         Task DeleteBuildAsync(PCBuild build);

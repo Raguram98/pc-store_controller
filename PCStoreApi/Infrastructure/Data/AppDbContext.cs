@@ -21,7 +21,12 @@ namespace PCStoreApi.Infrastructure.Data
             modelBuilder.Entity<UserInfo>()
                 .HasOne(u => u.PCBuild)
                 .WithOne(p => p.User)
-                .HasForeignKey<PCBuild>(p => p.UserID);
+                .HasForeignKey<PCBuild>(p => p.UserId);
+
+            modelBuilder.Entity<User>()
+                .HasOne(u => u.UserInfo)
+                .WithOne(ui => ui.User)
+                .HasForeignKey<UserInfo>(ui => ui.UserId);
         }
     }
 }

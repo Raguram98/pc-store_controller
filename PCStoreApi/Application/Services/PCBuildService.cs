@@ -24,7 +24,7 @@ namespace PCStoreApi.Application.Services
             return _mapper.Map<PCBuildReadDto>(build);
         }
 
-        public async Task<bool> DeleteBuildAsync(int id)
+        public async Task<bool> DeleteBuildAsync(Guid id)
         {
             var build = await _repo.GetBuildByIdAsync(id);
             if (build == null) return false;
@@ -39,20 +39,20 @@ namespace PCStoreApi.Application.Services
             return _mapper.Map<List<PCBuildReadDto>>(builds);
         }
 
-        public async Task<PCBuildReadDto?> GetBuildByIdAsync(int id)
+        public async Task<PCBuildReadDto?> GetBuildByIdAsync(Guid id)
         {
             var build = await _repo.GetBuildByIdAsync(id);
             return _mapper.Map<PCBuildReadDto>(build);
         }
 
-        public async Task<PCBuildReadDto> GetBuildByUserIdAsync(int userId)
+        public async Task<PCBuildReadDto> GetBuildByUserIdAsync(Guid userId)
         {
 
             var builds = await _repo.GetBuildByUserIdAsync(userId);
             return _mapper.Map<PCBuildReadDto>(builds);
         }
 
-        public async Task<bool> UpdateBuildAsync(int id, PCBuildUpdateDto dto)
+        public async Task<bool> UpdateBuildAsync(Guid id, PCBuildUpdateDto dto)
         {
             var build = await _repo.GetBuildByIdAsync(id);
             if (build == null) return false;

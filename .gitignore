@@ -1,7 +1,9 @@
-
 # Build output
 bin/
 obj/
+
+# EF Core
+Migrations/
 
 # User-specific files
 *.user
@@ -17,7 +19,6 @@ obj/
 
 TestResults/
 *.DS_Store
-
 
 # Other temp/cache files
 *.log

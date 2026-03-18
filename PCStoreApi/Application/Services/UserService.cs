@@ -16,46 +16,43 @@ namespace PCStoreApi.Application.Services
             _mapper = mapper;
         }
 
-        public async Task<UserReadDto?> CreateUserAsync(UserCreateDto dto)
+        public async Task<UserReadDto?> CreateUserAsync(Guid userId, UserCreateDto dto)
         {
-            var user = _mapper.Map<UserInfo>(dto);
-            await _repo.AddUserAsync(user);
+            var userInfo = _mapper.Map<UserInfo>(dto);
+            userInfo.UserId = userId;
+            await _repo.AddUserAsync(userInfo);
             await _repo.SaveChangesAsync();
-            if (string.IsNullOrEmpty(dto.Address))
-            {
-                Console.WriteLine("⚠️ WARNING: Address is null - validation likely skipped");
-            }
-            return _mapper.Map<UserReadDto>(user);
+            return _mapper.Map<UserReadDto>(userInfo);
         }
 
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<bool> DeleteUserAsync(Guid id)
         {
-            var user = await _repo.GetUserByIDAsync(id);
-            if (user == null) return false;
+            var userInfo = await _repo.GetUserByIdAsync(id);
+            if (userInfo == null) return false;
 
-            await _repo.DeleteUserAsync(user);
+            await _repo.DeleteUserAsync(userInfo);
             return await _repo.SaveChangesAsync();
         }
 
         public async Task<IEnumerable<UserReadDto>> GetAllUsersAsync()
         {
-            var users = await _repo.GetAllUsersAsync();
-            return _mapper.Map<List<UserReadDto>>(users);
+            var userInfo = await _repo.GetAllUsersAsync();
+            return _mapper.Map<List<UserReadDto>>(userInfo);
         }
 
-        public async Task<UserReadDto?> GetUserByIdAsync(int id)
+        public async Task<UserReadDto?> GetUserByIdAsync(Guid id)
         {
-            var user = await _repo.GetUserByIDAsync(id);
-            return user ==null? null : _mapper.Map<UserReadDto>(user);
+            var userInfo = await _repo.GetUserByIdAsync(id);
+            return userInfo == null? null : _mapper.Map<UserReadDto>(userInfo);
         }
 
-        public async Task<bool> UpdateUserAsync(int id, UserUpdateDto dto)
+        public async Task<bool> UpdateUserAsync(Guid id, UserUpdateDto dto)
         {
-            var user = await _repo.GetUserByIDAsync(id);
-            if (user == null) return false;
+            var userInfo = await _repo.GetUserByIdAsync(id);
+            if (userInfo == null) return false;
 
-            _mapper.Map(dto,user);
-            await _repo.UpdateUserAsync(user);
+            _mapper.Map(dto,userInfo);
+            await _repo.UpdateUserAsync(userInfo);
             return await _repo.SaveChangesAsync();
         }
     }

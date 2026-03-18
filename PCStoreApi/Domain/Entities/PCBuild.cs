@@ -6,7 +6,7 @@ namespace PCStoreApi.Domain.Entities
     public class PCBuild
     {
         [Key]
-        public int PCBuildId { get; set; }
+        public Guid PCBuildId { get; set; }
 
         [Required]
         public required string Processor { get; set; }
@@ -18,7 +18,7 @@ namespace PCStoreApi.Domain.Entities
         [Required]
         public string? Storage { get; set; }
 
-        public int UserID {  get; set; }
+        public Guid UserId {  get; set; }
 
         public UserInfo? User { get; set; }
     }

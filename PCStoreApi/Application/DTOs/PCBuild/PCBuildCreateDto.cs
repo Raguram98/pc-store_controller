@@ -6,6 +6,6 @@
         public int RamInGB { get; set; }
         public string? GraphicsCard {  get; set; }
         public string Storage { get; set; } = null!;
-        public int UserID { get; set; }
+        public Guid UserId { get; set; }
     }
 }

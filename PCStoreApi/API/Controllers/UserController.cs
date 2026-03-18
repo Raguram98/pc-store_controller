@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PCStoreApi.Application.DTOs.User;
 using PCStoreApi.Application.Interfaces;
+using PCStoreApi.Domain.Entities;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace PCStoreApi.API.Controllers
 {
@@ -33,7 +36,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var user = await _userService.GetUserByIdAsync(id);
             return user is null ? NotFound() : Ok(user);
@@ -56,7 +59,14 @@ namespace PCStoreApi.API.Controllers
                 return BadRequest(new { errors });
             }
 
-            var created = await _userService.CreateUserAsync(dto);
+            var userIdcClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            if (userIdcClaim is null) 
+                return Unauthorized();
+
+            var userId = Guid.Parse(userIdcClaim);
+
+            var created = await _userService.CreateUserAsync(userId, dto);
 
             return CreatedAtAction(nameof(GetById),
                 new { id = created.UserId },
@@ -65,7 +75,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UserUpdateDto dto)
+        public async Task<IActionResult> Update(Guid id, UserUpdateDto dto)
         {
             var result = await _updateValidator.ValidateAsync(dto);
 
@@ -87,7 +97,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var success = await _userService.DeleteUserAsync(id);
             return success ? NoContent() : NotFound();

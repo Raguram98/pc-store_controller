@@ -1,15 +1,8 @@
 ﻿using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using PCStoreApi.Domain.Entities;
 using PCStoreApi.Infrastructure.Data;
 using PCStoreApi.Infrastructure.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PCStoreApi.Tests.Repositories
 {
@@ -21,23 +14,19 @@ namespace PCStoreApi.Tests.Repositories
         public PCBuildRepositoryTests()
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString()).Options;
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
 
             _context = new AppDbContext(options);
             _repo = new PCBuildRepository(_context);
         }
 
+
         [Fact]
         public async Task AddBuildAsync_ShouldAddNewPCBuild()
         {
-            var user = new UserInfo
-            {
-                FullName = "John Wick",
-                Email = "john@continental.com",
-                Address = "New York"
-            };
-            await _context.UserInfo.AddAsync(user);
-            await _context.SaveChangesAsync();
+            // Arrange
+            var userId = await CreateUserAsync();
 
             var build = new PCBuild
             {
@@ -45,37 +34,34 @@ namespace PCStoreApi.Tests.Repositories
                 RamInGB = 16,
                 GraphicsCard = "RTX 3060",
                 Storage = "1TB SSD",
-                UserID = user.UserID
+                UserId = userId
             };
 
+            // Act
             await _repo.AddBuildAsync(build);
-            await _context.SaveChangesAsync();
+            await _repo.SaveChangesAsync();
 
-            var result = await _context.PCBuilds.FirstOrDefaultAsync(p => p.PCBuildId == build.PCBuildId);
+            // Assert
+            var result = await _context.PCBuilds.FindAsync(build.PCBuildId);
             result.Should().NotBeNull();
-            result.Processor.Should().Be("Ryzen 5 5600");
+            result!.Processor.Should().Be("Ryzen 5 5600");
         }
 
         [Fact]
         public async Task GetBuildByIdAsync_ShouldReturnPCBuild_WhenExists()
         {
-            var user = new UserInfo
-            {
-                FullName = "John Wick",
-                Email = "john@continental.com",
-                Address = "New York"
-            };
-            await _context.UserInfo.AddAsync(user);
-            await _context.SaveChangesAsync();
             // Arrange
+            var userId = await CreateUserAsync();
+
             var build = new PCBuild
             {
                 Processor = "i7-13700K",
                 RamInGB = 32,
                 GraphicsCard = "RTX 4080",
                 Storage = "2TB NVMe SSD",
-                UserID = user.UserID
+                UserId = userId
             };
+
             await _repo.AddBuildAsync(build);
             await _repo.SaveChangesAsync();
 
@@ -90,15 +76,8 @@ namespace PCStoreApi.Tests.Repositories
         [Fact]
         public async Task GetBuildByUserIdAsync_ShouldReturnBuildLinkedToUser()
         {
-            var user = new UserInfo
-            {
-                FullName = "Arthur Morgan",
-                Email = "arthur@rdr2.com",
-                Address = "Valentine"
-            };
-
-            await _context.UserInfo.AddAsync(user);
-            await _context.SaveChangesAsync();
+            // Arrange
+            var userId = await CreateUserAsync();
 
             var build = new PCBuild
             {
@@ -106,46 +85,42 @@ namespace PCStoreApi.Tests.Repositories
                 RamInGB = 32,
                 GraphicsCard = "RTX 4090",
                 Storage = "2TB SSD",
-                UserID = user.UserID
+                UserId = userId
             };
-            await _context.PCBuilds.AddAsync(build);
-            await _context.SaveChangesAsync();
 
+            await _repo.AddBuildAsync(build);
+            await _repo.SaveChangesAsync();
 
-            var result = await _repo.GetBuildByUserIdAsync(user.UserID);
+            // Act
+            var result = await _repo.GetBuildByUserIdAsync(userId);
 
-
+            // Assert
             result.Should().NotBeNull();
-            result!.UserID.Should().Be(user.UserID);
+            result!.UserId.Should().Be(userId);
         }
 
         [Fact]
         public async Task UpdateBuildAsync_ShouldModifyExistingBuild()
         {
-            var user = new UserInfo
-            {
-                FullName = "Arthur Morgan",
-                Email = "arthur@rdr2.com",
-                Address = "Valentine"
-            };
+            // Arrange
+            var userId = await CreateUserAsync();
 
-            await _context.UserInfo.AddAsync(user);
-            await _context.SaveChangesAsync();
             var build = new PCBuild
             {
                 Processor = "Ryzen 3 3200G",
                 RamInGB = 8,
                 GraphicsCard = "GTX 1650",
                 Storage = "500GB HDD",
-                UserID = 1
+                UserId = userId
             };
-            await _context.PCBuilds.AddAsync(build);
-            await _context.SaveChangesAsync();
 
+            await _repo.AddBuildAsync(build);
+            await _repo.SaveChangesAsync();
+
+            // Act
             build.RamInGB = 16;
             build.Storage = "1TB SSD";
 
-            // Act
             await _repo.UpdateBuildAsync(build);
             await _repo.SaveChangesAsync();
 
@@ -158,15 +133,8 @@ namespace PCStoreApi.Tests.Repositories
         [Fact]
         public async Task DeleteBuildAsync_ShouldRemoveBuild()
         {
-            var user = new UserInfo
-            {
-                FullName = "Arthur Morgan",
-                Email = "arthur@rdr2.com",
-                Address = "Valentine"
-            };
-
-            await _context.UserInfo.AddAsync(user);
-            await _context.SaveChangesAsync();
+            // Arrange
+            var userId = await CreateUserAsync();
 
             var build = new PCBuild
             {
@@ -174,39 +142,29 @@ namespace PCStoreApi.Tests.Repositories
                 RamInGB = 32,
                 GraphicsCard = "RTX 4090",
                 Storage = "2TB SSD",
-                UserID = user.UserID
+                UserId = userId
             };
-            await _context.PCBuilds.AddAsync(build);
-            await _context.SaveChangesAsync();
 
+            await _repo.AddBuildAsync(build);
+            await _repo.SaveChangesAsync();
+
+            // Act
             await _repo.DeleteBuildAsync(build);
             await _repo.SaveChangesAsync();
 
-            var exists = await _context.PCBuilds.AnyAsync(b => b.PCBuildId == build.PCBuildId);
+            // Assert
+            var exists = await _context.PCBuilds
+                .AnyAsync(b => b.PCBuildId == build.PCBuildId);
+
             exists.Should().BeFalse();
         }
 
         [Fact]
         public async Task GetAllBuildsAsync_ShouldReturnAllBuilds()
         {
-            var users = new List<UserInfo>
-            {
-                new UserInfo
-                {
-                FullName = "Arthur Morgan",
-                Email = "arthur@rdr2.com",
-                Address = "Valentine"
-            },
-                new UserInfo
-            {
-                FullName = "John Marston",
-                Email = "john@rdr2.com",
-                Address = "Old West Street"
-            }
-            };
-
-            await _context.UserInfo.AddRangeAsync(users);
-            await _context.SaveChangesAsync();
+            // Arrange
+            var user1 = await CreateUserAsync();
+            var user2 = await CreateUserAsync();
 
             var builds = new List<PCBuild>
             {
@@ -216,7 +174,7 @@ namespace PCStoreApi.Tests.Repositories
                     RamInGB = 16,
                     GraphicsCard = "RTX 3060",
                     Storage = "1TB SSD",
-                    UserID = 1
+                    UserId = user1
                 },
                 new PCBuild
                 {
@@ -224,15 +182,48 @@ namespace PCStoreApi.Tests.Repositories
                     RamInGB = 32,
                     GraphicsCard = "RTX 3070",
                     Storage = "2TB NVMe SSD",
-                    UserID = 2
+                    UserId = user2
                 }
             };
-            await _context.PCBuilds.AddRangeAsync(builds);
-            await _context.SaveChangesAsync();
 
+            foreach (var build in builds)
+            {
+                await _repo.AddBuildAsync(build);
+            }
+
+            await _repo.SaveChangesAsync();
+
+            // Act
             var result = await _repo.GetAllBuildsAsync();
 
+            // Assert
             result.Should().HaveCount(2);
+        }
+
+        private async Task<Guid> CreateUserAsync()
+        {
+            var userId = Guid.NewGuid();
+
+            var user = new User
+            {
+                Id = userId,
+                Email = "test@test.com",
+                HashedPassword = "dummy",
+                Role = "User"
+            };
+
+            var userInfo = new UserInfo
+            {
+                UserId = userId,
+                FullName = "Test User",
+                Address = "Test Address"
+            };
+
+            await _context.Users.AddAsync(user);
+            await _context.UserInfo.AddAsync(userInfo);
+            await _context.SaveChangesAsync();
+
+            return userId;
         }
     }
 }

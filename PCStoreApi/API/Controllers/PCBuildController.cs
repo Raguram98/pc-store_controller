@@ -1,11 +1,8 @@
 ﻿using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
 using PCStoreApi.Application.DTOs.PCBuild;
 using PCStoreApi.Application.Interfaces;
-using System.Collections;
 
 namespace PCStoreApi.API.Controllers
 {
@@ -41,7 +38,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(Guid id)
         {
             var build = await _pcBuildService.GetBuildByIdAsync(id);
             return build is null ? NotFound() : Ok(build);
@@ -49,7 +46,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetByUserId(int userId)
+        public async Task<IActionResult> GetByUserId(Guid userId)
         {
             var user = await _userService.GetUserByIdAsync(userId);
             if (user is null)
@@ -84,7 +81,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, PCBuildUpdateDto dto)
+        public async Task<IActionResult> Update(Guid id, PCBuildUpdateDto dto)
         {
             var result = await _updateValidator.ValidateAsync(dto);
             if (!result.IsValid)
@@ -104,7 +101,7 @@ namespace PCStoreApi.API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(Guid id)
         {
             var success = await _pcBuildService.DeleteBuildAsync(id);
             return success ? NoContent() : NotFound();

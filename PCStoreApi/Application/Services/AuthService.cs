@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PCStoreApi.Application.DTOs.Auth;
@@ -7,7 +6,6 @@ using PCStoreApi.Application.Interfaces;
 using PCStoreApi.Domain.Entities;
 using PCStoreApi.Infrastructure.Data;
 using System.IdentityModel.Tokens.Jwt;
-using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -21,7 +19,7 @@ namespace PCStoreApi.Application.Services
 
         public async Task<TokenResponseDto?> LoginAsync(UserDto request)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
             if (user is null)
             {
                 return null;
@@ -47,7 +45,7 @@ namespace PCStoreApi.Application.Services
 
         public async Task<User?> RegisterAsync(UserDto request)
         {
-            if(await _context.Users.AnyAsync(u => u.Username == request.Username))
+            if(await _context.Users.AnyAsync(u => u.Email == request.Email))
             {
                 return null;
             }
@@ -56,7 +54,7 @@ namespace PCStoreApi.Application.Services
 
             var hashedPassword = new PasswordHasher<User>().HashPassword(user, request.Password);
 
-            user.Username = request.Username;
+            user.Email = request.Email;
             user.HashedPassword = hashedPassword;
             user.Role = "User";
 
@@ -111,8 +109,8 @@ namespace PCStoreApi.Application.Services
         {
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
@@ -130,7 +128,5 @@ namespace PCStoreApi.Application.Services
 
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
-
-        
     }
 }

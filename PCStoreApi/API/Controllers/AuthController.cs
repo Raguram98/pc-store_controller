@@ -1,13 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.AspNetCore.Mvc;
 using PCStoreApi.Application.DTOs.Auth;
 using PCStoreApi.Application.Interfaces;
-using PCStoreApi.Domain.Entities;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 
 namespace PCStoreApi.API.Controllers
 {
@@ -22,13 +15,13 @@ namespace PCStoreApi.API.Controllers
 
             if (user == null)
             {
-                return BadRequest("Username already exists.");
+                return BadRequest("Email already exists.");
             }
 
             return Ok(new UserResponseDto
             {
                Id = user.Id,
-               Username = user.Username,
+               Email = user.Email,
                Role = user.Role,
             });
         }
@@ -40,7 +33,7 @@ namespace PCStoreApi.API.Controllers
 
             if (response == null)
             {
-                return BadRequest("Ivalid username or Password");
+                return BadRequest("Invalid username or Password");
             }
 
             return Ok(response);

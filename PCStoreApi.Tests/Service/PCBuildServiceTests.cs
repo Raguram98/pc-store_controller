@@ -33,9 +33,11 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task CreateBuildAsync_ShouldReturnMappedDto_WhenBuildCreated()
         {
-            var createDto = new PCBuildCreateDto { Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserID = 1 };
-            var build = new PCBuild { PCBuildId = 1, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserID = 1 };
-            var readDto = new PCBuildReadDto { PCBuildId = 1, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserID = 1 };
+            var userId = Guid.NewGuid();
+            var pcBuildId = Guid.NewGuid();
+            var createDto = new PCBuildCreateDto { Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserId = userId };
+            var build = new PCBuild { PCBuildId = pcBuildId, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserId = userId };
+            var readDto = new PCBuildReadDto { PCBuildId = pcBuildId, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserId = userId };
 
             _mapperMock.Setup(m => m.Map<PCBuild>(createDto)).Returns(build);
             _repoMock.Setup(r => r.AddBuildAsync(build)).Returns(Task.CompletedTask);
@@ -45,7 +47,7 @@ namespace PCStoreApi.Tests.Service
             var result = await _service.CreateBuildAsync(createDto);
 
             result.Should().NotBeNull();
-            result.PCBuildId.Should().Be(1);
+            result.PCBuildId.Should().Be(pcBuildId);
             _repoMock.Verify(r => r.AddBuildAsync(build), Times.Once);
             _repoMock.Verify(r => r.SaveChangesAsync(), Times.Once);
         }
@@ -53,16 +55,26 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task GetAllBuildAsync_ShouldReturnMappedList()
         {
+            var userIds = new List<Guid>
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid()
+            };
+            var pcBuildIds = new List<Guid>
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid()
+            };
             var builds = new List<PCBuild>
             {
-                new PCBuild {PCBuildId = 1, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserID = 1 },
-                new PCBuild {PCBuildId = 2, Processor = "Intel i5", RamInGB = 8, Storage = "512GB SSD", UserID = 2 }
+                new PCBuild {PCBuildId = pcBuildIds[0], Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserId = userIds[0]},
+                new PCBuild {PCBuildId = pcBuildIds[1], Processor = "Intel i5", RamInGB = 8, Storage = "512GB SSD", UserId = userIds[1]}
             };
 
             var readDtos = new List<PCBuildReadDto>
             {
-                new PCBuildReadDto {PCBuildId = 1, Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserID = 1 },
-                new PCBuildReadDto {PCBuildId = 2, Processor = "Intel i5", RamInGB = 8, Storage = "512GB SSD", UserID = 2 }
+                new PCBuildReadDto {PCBuildId = pcBuildIds[0], Processor = "Ryzen 3", RamInGB = 16, Storage = "1TB SSD", UserId = userIds[0]},
+                new PCBuildReadDto {PCBuildId = pcBuildIds[1], Processor = "Intel i5", RamInGB = 8, Storage = "512GB SSD", UserId = userIds[1]}
             };
 
             _repoMock.Setup(r => r.GetAllBuildsAsync()).ReturnsAsync(builds);
@@ -78,28 +90,30 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task GetBuildByIdAsync_ShouldReturnMappedDto_WhenExists()
         {
+            var userId = Guid.NewGuid();
+            var pcBuildId = Guid.NewGuid();
             var build = new PCBuild
             {
-                PCBuildId = 1,
+                PCBuildId = pcBuildId,
                 Processor = "Ryzen 3",
                 RamInGB = 16,
                 Storage = "1TB SSD",
-                UserID = 1
+                UserId = userId
             };
 
             var readDto = new PCBuildReadDto
             {
-                PCBuildId = 1,
+                PCBuildId = pcBuildId,
                 Processor = "Ryzen 3",
                 RamInGB = 16,
                 Storage = "1TB SSD",
-                UserID = 1
+                UserId = userId
             };
 
-            _repoMock.Setup(r => r.GetBuildByIdAsync(1)).ReturnsAsync(build);
+            _repoMock.Setup(r => r.GetBuildByIdAsync(pcBuildId)).ReturnsAsync(build);
             _mapperMock.Setup(m => m.Map<PCBuildReadDto>(build)).Returns(readDto);
 
-            var result = await _service.GetBuildByIdAsync(1);
+            var result = await _service.GetBuildByIdAsync(pcBuildId);
 
             result.Should().NotBeNull();
             result!.Processor.Should().Be("Ryzen 3");
@@ -108,15 +122,17 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task GetBuildByUserIdAsync_ShouldReturnPCBuild_WhenUserExists()
         {
-            var userId = 10;
+            var userId = Guid.NewGuid();
+            var pcBuildId = Guid.NewGuid();
+
             var build = new PCBuild
             {
-                PCBuildId = 1,
+                PCBuildId = pcBuildId,
                 Processor = "Ryzen 7 5800X",
                 RamInGB = 32,
                 GraphicsCard = "RTX 3080",
                 Storage = "2TB NVMe",
-                UserID = userId
+                UserId = userId
             };
 
             _repoMock.Setup(r => r.GetBuildByUserIdAsync(userId))
@@ -130,20 +146,20 @@ namespace PCStoreApi.Tests.Service
                     RamInGB = build.RamInGB,
                     GraphicsCard = build.GraphicsCard,
                     Storage = build.Storage,
-                    UserID = build.UserID
+                    UserId = build.UserId
                 });
 
             var result = await _service.GetBuildByUserIdAsync(userId);
 
             result.Should().NotBeNull();
             result!.Processor.Should().Be("Ryzen 7 5800X");
-            result.UserID.Should().Be(userId);
+            result.UserId.Should().Be(userId);
         }
 
         [Fact]
         public async Task GetBuildByUserIdAsync_ShouldReturnNull_WhenUserNotFound()
         {
-            var userId = 99;
+            var userId = Guid.NewGuid();
             _repoMock.Setup(r => r.GetBuildByUserIdAsync(userId))
                 .ReturnsAsync((PCBuild?)null);
 
@@ -155,13 +171,16 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task UpdateBuildAsync_ShouldReturnTrue_WhenBuildExists()
         {
+            var userId = Guid.NewGuid();
+            var pcBuildId = Guid.NewGuid();
+
             var existing = new PCBuild
             {
-                PCBuildId = 1,
+                PCBuildId = pcBuildId,
                 Processor = "Ryzen 3",
                 RamInGB = 16,
                 Storage = "1TB SSD",
-                UserID = 1
+                UserId = userId
             };
             var updateDto = new PCBuildUpdateDto
             {
@@ -170,12 +189,12 @@ namespace PCStoreApi.Tests.Service
                 Storage = "2TB SSD"
             };
 
-            _repoMock.Setup(r => r.GetBuildByIdAsync(1)).ReturnsAsync(existing);
+            _repoMock.Setup(r => r.GetBuildByIdAsync(pcBuildId)).ReturnsAsync(existing);
             _repoMock.Setup(r => r.UpdateBuildAsync(existing)).Returns(Task.CompletedTask);
             _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
             _mapperMock.Setup(m => m.Map(updateDto, existing));
 
-            var result = await _service.UpdateBuildAsync(1, updateDto);
+            var result = await _service.UpdateBuildAsync(pcBuildId, updateDto);
 
             result.Should().BeTrue();
             _repoMock.Verify(r => r.UpdateBuildAsync(existing), Times.Once);
@@ -185,9 +204,11 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task UpdateBuildAsync_ShouldReturnFalse_WhenBuildNotFound()
         {
-            _repoMock.Setup(r => r.GetBuildByIdAsync(1)).ReturnsAsync((PCBuild?)null);
+            var pcBuildId = Guid.NewGuid();
 
-            var result = await _service.UpdateBuildAsync(1, new PCBuildUpdateDto());
+            _repoMock.Setup(r => r.GetBuildByIdAsync(pcBuildId)).ReturnsAsync((PCBuild?)null);
+
+            var result = await _service.UpdateBuildAsync(pcBuildId, new PCBuildUpdateDto());
 
             result.Should().BeFalse();
         }
@@ -195,19 +216,22 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task DeleteBuildAsync_ShouldReturnTrue_WhenBuildExists()
         {
+            var userId = Guid.NewGuid();
+            var pcBuildId = Guid.NewGuid();
+
             var build = new PCBuild
             {
-                PCBuildId = 1,
+                PCBuildId = pcBuildId,
                 Processor = "Ryzen 3",
                 RamInGB = 16,
                 Storage = "1TB SSD",
-                UserID = 1
+                UserId = userId
             };
-            _repoMock.Setup(r => r.GetBuildByIdAsync(1)).ReturnsAsync(build);
+            _repoMock.Setup(r => r.GetBuildByIdAsync(pcBuildId)).ReturnsAsync(build);
             _repoMock.Setup(r => r.DeleteBuildAsync(build)).Returns(Task.CompletedTask);
             _repoMock.Setup(r => r.SaveChangesAsync()).ReturnsAsync(true);
 
-            var result = await _service.DeleteBuildAsync(1);
+            var result = await _service.DeleteBuildAsync(pcBuildId);
 
             result.Should().BeTrue();
         }
@@ -215,8 +239,9 @@ namespace PCStoreApi.Tests.Service
         [Fact]
         public async Task DeleteBuildAsync_ShouldReturnFalse_WhenBuildNotFound()
         {
-            _repoMock.Setup(r => r.GetBuildByIdAsync(1)).ReturnsAsync((PCBuild?)null);
-            var result = await _service.DeleteBuildAsync(1);
+            var pcBuildId = Guid.NewGuid();
+            _repoMock.Setup(r => r.GetBuildByIdAsync(pcBuildId)).ReturnsAsync((PCBuild?)null);
+            var result = await _service.DeleteBuildAsync(pcBuildId);
             result.Should().BeFalse();
         }
     }

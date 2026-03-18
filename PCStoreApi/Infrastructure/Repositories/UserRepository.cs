@@ -30,9 +30,9 @@ namespace PCStoreApi.Infrastructure.Repositories
             return await _context.UserInfo.Include(u => u.PCBuild).ToListAsync();
         }
 
-        public async Task<UserInfo?> GetUserByIDAsync(int id)
+        public async Task<UserInfo?> GetUserByIdAsync(Guid id)
         {
-            return await _context.UserInfo.Include(u => u.PCBuild).FirstOrDefaultAsync(u => u.UserID == id);
+            return await _context.UserInfo.Include(u => u.PCBuild).FirstOrDefaultAsync(u => u.UserId == id);
         }
 
         public async Task<bool> SaveChangesAsync()
